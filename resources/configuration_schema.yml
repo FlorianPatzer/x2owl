@@ -1,0 +1,143 @@
+#Available modes (resp. variants of x2owl)
+mode: enum('cli', 'ua')
+
+#If true, it activates the preprocessing for the input ontology (cf. documentation)
+ontology_preprocessor: bool()
+
+#If true, it activates the postprocessing for the output ontology (cf. documentation)
+ontology_postprocessor: bool()
+
+#Ontology repository path
+owl_ontology_repository: str()
+
+#The ontology to load to provide the necessary TBox
+owl_input_ontology_file: str()
+
+#The file to write the resulting ontology to
+owl_output_ontology_file: str()
+
+# Ontology output serializations/syntaxes
+owl_output_ontology_file_type: enum('ntriples', 'rdfxml')
+
+#Namespace of the ontology to load
+owl_ontology_namespace: str()
+
+#Unique identifier type (either "object", string)
+owl_unique_identifier_type: enum('string', 'object')
+
+#Required, if owl_unique_identifier_type is 'object'.
+#Name of the object, to be found in the remaining config, to use in order to extract a unique suffix for IRIs
+owl_unique_identifier_object: str(required=False)
+
+#String to use as unique suffix
+owl_unique_identifier_string: str(required=False)
+
+#True if command output shall be read from a file (only supported for mode cli) and false otherwise
+commands_from_file: bool(required=False)
+
+#Path to the file commands shall be read from, if commands_from_file is set to true
+commands_file: str(required=False)
+
+#List of templates/configurations for the command parser
+commands: list(include('command_entry'))
+
+---
+
+command_entry:
+    #Command string
+    command: str()
+
+    #Object name for json object tree (which is the intermediate object representation of x2owl)
+    object: str()
+
+    #OWL class for which an individual is created using the regex result as name
+    owl_class: str(required=False)
+
+    #OWL class which is used as the "parent" of the class if it has to be created
+    owl_class_parent: str(required=False)
+
+    #Name (IRI without prefix) of the object Property to use for the here created individual.
+    #The property's domain is by default the parent object's individual.
+    owl_objectProperty: str(required=False)
+
+    #Name (IRI without prefix) of the data Property to use for a value
+    owl_dataProperty: str(required=False)
+
+    #Parent data property (IRI without prefix) of the data Property to use for a value, if the property has to be created
+    owl_dataProperty_parent: str(required=False)
+
+    #Name of the object which's individual shall be put into the domain of the data Property to use for a value.
+    #Currently only predecessors of the same yml branch can be selected as domain_objects
+    owl_dataProperty_domain_object: str(required=False)
+
+    #A regex string to extract the name of this object's individual
+    regex: str(required=False)
+
+    #If true, it tells the parser to not delete the extracted string from the loaded command string.
+    #In that case, a following regex search would be able to find the string again.
+    regex_rewind: bool(required=False)
+
+    #A default_value if no regex is defined or the regex search is no successful.
+    default_value: any(str(), int(), bool(), required=False)
+
+    #If the sub-configurations (contained by the objects list) of a command have been processed, the parser usually goes
+    # on with the next command configuration. If this flag is set to true, it tells the parser rerun the processing of
+    # the sub-configuration on the leftover command string, as long as the respective regex searches are still successful.
+    iterate_subtree_mapping: bool(required=False)
+
+    #Sub-objects/sub-configuration
+    objects: list(include('object_entry'), required=False)
+
+object_entry:
+    #Object name for json object tree (which is the intermediate object representation of x2owl)
+    object: str()
+
+    #A regex string to extract the value (name for individual or object, or value for data property) of this object's individual
+    regex: str()
+
+    #If true, it tells the parser to not delete the extracted string from the loaded command string.
+    #In that case, a following regex search would be able to find the string again.
+    regex_rewind: bool(required=False)
+
+    #A default_value if no regex is defined or the regex search is no successful.
+    default_value: any(str(), int(), bool(), required=False)
+
+    #OWL class for which an individual is created using the regex result or default_value as name
+    owl_class: str(required=False)
+
+    #OWL class which is used as the "parent" of the class if it has to be created
+    owl_class_parent: str(required=False)
+
+    #Name (IRI without prefix) of the object Property to use for the here created individual.
+    #The property's domain is by default the parent object's individual, if not defined otherwise.
+    owl_objectProperty: str(required=False)
+
+    #Name of the object which's individual shall be put into the domain of the object property.
+    #Currently only predecessors of the same yml branch can be selected as domain objects.
+    owl_objectProperty_domain_object: str(required=False)
+
+    #Name (IRI without prefix) of the data Property to use for a value
+    owl_dataProperty: str(required=False)
+
+    #Parent data property (IRI without prefix) of the data Property to use for a value, if the property has to be created
+    owl_dataProperty_parent: str(required=False)
+
+    #Name of the object which's individual shall be put into the domain of the data property to use for a value.
+    #Currently only predecessors of the same yml branch can be selected as domain objects.
+    owl_dataProperty_domain_object: str(required=False)
+
+    #The data type of the value if a data property is used. This defaults to string.
+    data_type: any('int', 'bool', 'string', required=False)
+
+    #An IRI suffix to add to a created individual
+    owl_iri_suffix: str(required=False)
+
+    #A list of postprocessing functions (defined in the vendor.modules.processorOwl module) to pass the individual to.
+    owl_postprocessing_functions: list(str(), required=False)
+
+    #A preprocessing function (defined in the vendor.modules.processorOwl module) to pass the extracted value to.
+    owl_preprocessing_function: str(required=False)
+
+    #Sub-objects/sub-configuration. Currently only 3 levels of object lists are supported.
+    objects: list(include('object_entry'), required=False)
+
